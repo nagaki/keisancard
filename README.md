@@ -2,6 +2,8 @@
 
 計算カードのような React アプリケーションです。
 
+https://nagaki.github.io/keisancard/
+
 ## 機能
 
 1. 計算のもんだいを表示します
