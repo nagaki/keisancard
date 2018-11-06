@@ -16,10 +16,11 @@ import {
   WithStyles
 } from "@material-ui/core/styles";
 
-import green from "@material-ui/core/colors/green";
+import blue from "@material-ui/core/colors/blue";
 import pink from "@material-ui/core/colors/pink";
 
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
+import { Keyboard } from "./Keyboard";
 
 /**
  * 計算カードに使用する数の最小値
@@ -29,20 +30,12 @@ const minNumber = 0;
 /**
  * 計算カードに使用する数の最大値
  */
-const maxNumber = 20;
+const maxNumber = 12;
 
 /**
  * 待ち時間（ms）
  */
 const timeout = 2000;
-
-/**
- * 答えあわせトリガーのキーコード
- */
-const keyCodes = [
-  13, // return
-  32 // space
-];
 
 /**
  * 状況タイプ
@@ -59,7 +52,7 @@ enum StateType {
  * メッセージ
  */
 const messages = [
-  "⚖️ もんだいを作っています...",
+  "⚖️ もんだい作成中...",
   "🤔 こたえてね",
   "🖍 こたえあわせ中...",
   "まちがい ❌",
@@ -72,9 +65,10 @@ const messages = [
 const exTheme = createMuiTheme({
   palette: {
     primary: { main: pink[300] },
-    secondary: { main: green[300] }
+    secondary: { main: blue[300], contrastText: "#fff" }
   },
   typography: {
+    fontSize: 24,
     useNextVariants: true
   }
 });
@@ -87,35 +81,34 @@ const exTheme = createMuiTheme({
 const styles = (theme: Theme) =>
   createStyles({
     expr: {
-      fontSize: 100
+      fontSize: "2rem"
     },
     field: {
-      fontSize: 100,
       textAlign: "right",
-      width: "1.5em"
+      width: "2em"
     },
     message: {
       color: theme.palette.primary.contrastText,
-      fontSize: 50,
-      padding: theme.spacing.unit * 2,
+      fontWeight: "bold",
+      marginBottom: theme.spacing.unit,
+      padding: theme.spacing.unit,
       textAlign: "center"
     },
     paper: {
-      marginBottom: theme.spacing.unit * 2,
-      padding: theme.spacing.unit * 2
+      marginBottom: theme.spacing.unit,
+      padding: theme.spacing.unit
     },
     root: {
       backgroundColor: pink[300],
       boxSizing: "border-box",
       minHeight: "100vh",
-      padding: theme.spacing.unit * 4
+      padding: theme.spacing.unit * 2
     },
     title: {
       color: theme.palette.primary.contrastText,
-      fontSize: 50,
       fontWeight: "bold",
-      marginBottom: theme.spacing.unit * 2,
-      padding: theme.spacing.unit * 2,
+      marginBottom: theme.spacing.unit,
+      padding: theme.spacing.unit,
       textAlign: "center"
     }
   });
@@ -157,12 +150,8 @@ const genNumber = (min: number, max: number) => {
  */
 const App = withStyles(styles)(
   class extends React.Component<IAppProps, IAppState> {
-    private numberInput: React.RefObject<HTMLInputElement>;
-
     constructor(props: IAppProps) {
       super(props);
-
-      this.numberInput = React.createRef();
 
       this.state = {
         cardAnswer: 0,
@@ -212,26 +201,30 @@ const App = withStyles(styles)(
         cardNumber: this.state.cardNumber + 1,
         state: StateType.WAITING
       });
-
-      if (this.numberInput.current) {
-        this.numberInput.current.focus();
-      }
     };
 
-    public handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      this.setState({
-        inputAnswer: event.target.value
-      });
+    public hangleKeyboardChange = (label: string) => {
+      const answer = this.state.inputAnswer;
+
+      if (label === "=") {
+        this.checkAnswer();
+      } else if (label === "AC") {
+        this.setState({
+          inputAnswer: ""
+        });
+      } else if (label === "0" && answer === "") {
+        // 何もしない
+      } else {
+        this.setState({
+          inputAnswer: answer + label
+        });
+      }
     };
 
     /**
      * 答えあわせをする
      */
-    public checkAnswer = (event: React.KeyboardEvent<HTMLDivElement>) => {
-      if (keyCodes.indexOf(event.keyCode) === -1) {
-        return;
-      }
-
+    public checkAnswer = () => {
       this.setState({
         state: StateType.CHECK
       });
@@ -273,14 +266,7 @@ const App = withStyles(styles)(
         <MuiThemeProvider theme={exTheme}>
           <div className={classes.root}>
             <Typography className={classes.title}>
-              <ruby>
-                計<rp>(</rp>
-                <rt>けい</rt>
-                <rp>)</rp>算<rp>(</rp>
-                <rt>さん</rt>
-                <rp>)</rp>
-              </ruby>
-              {`カード #${cardNumber}`}
+              {`計算カード #${cardNumber}`}
             </Typography>
             <Paper className={classes.paper}>
               <Grid
@@ -288,11 +274,11 @@ const App = withStyles(styles)(
                 container={true}
                 direction="row"
                 justify="center"
-                spacing={24}
+                spacing={8}
               >
                 <Grid item={true}>
                   {state === StateType.TURNING ? (
-                    <CircularProgress color="secondary" size={100} />
+                    <CircularProgress color="secondary" />
                   ) : (
                     false
                   )}
@@ -302,22 +288,12 @@ const App = withStyles(styles)(
                 </Grid>
                 <Grid item={true}>
                   <TextField
-                    autoFocus={true}
-                    disabled={state !== StateType.WAITING}
                     InputProps={{
                       classes: {
                         input: classes.field
                       },
-                      inputProps: {
-                        max: maxNumber * 2, // 入力できる最大値
-                        min: minNumber
-                      }
+                      readOnly: true
                     }}
-                    inputRef={this.numberInput}
-                    margin="normal"
-                    onChange={this.handleChange}
-                    onKeyDown={this.checkAnswer}
-                    type="number"
                     value={inputAnswer}
                     variant="outlined"
                   />
@@ -327,6 +303,7 @@ const App = withStyles(styles)(
             <Typography className={classes.message}>
               {messages[state]}
             </Typography>
+            <Keyboard onChange={this.hangleKeyboardChange} />
           </div>
         </MuiThemeProvider>
       );
