@@ -1,12 +1,6 @@
 import * as React from "react";
 
-import {
-  CircularProgress,
-  Grid,
-  Paper,
-  TextField,
-  Typography
-} from "@material-ui/core";
+import { Typography } from "@material-ui/core";
 
 import {
   createMuiTheme,
@@ -16,11 +10,12 @@ import {
   WithStyles
 } from "@material-ui/core/styles";
 
-import blue from "@material-ui/core/colors/blue";
 import pink from "@material-ui/core/colors/pink";
+import teal from "@material-ui/core/colors/teal";
 
 import { Theme } from "@material-ui/core/styles/createMuiTheme";
-import { Keyboard } from "./Keyboard";
+
+import { Key } from "./Key";
 
 /**
  * 計算カードに使用する数の最小値
@@ -65,7 +60,7 @@ const messages = [
 const exTheme = createMuiTheme({
   palette: {
     primary: { main: pink[300] },
-    secondary: { main: blue[300], contrastText: "#fff" }
+    secondary: { main: teal[300], contrastText: "#fff" }
   },
   typography: {
     fontSize: 24,
@@ -80,36 +75,63 @@ const exTheme = createMuiTheme({
  */
 const styles = (theme: Theme) =>
   createStyles({
-    expr: {
-      fontSize: "2rem"
+    answer: {
+      alignSelf: "center",
+      color: theme.palette.primary.contrastText,
+      fontSize: "3rem",
+      gridColumn: "8 / span 2",
+      letterSpacing: "-0.1rem",
+      textAlign: "left"
     },
-    field: {
-      textAlign: "right",
-      width: "2em"
+    expr: {
+      alignSelf: "center",
+      color: theme.palette.primary.contrastText,
+      fontSize: "3rem",
+      gridColumn: "2 / span 6",
+      letterSpacing: "-0.1rem",
+      textAlign: "right"
+    },
+    keyboard: {
+      display: "grid",
+      gridGap: `${theme.spacing.unit * 3}px`,
+      gridTemplateColumns: "repeat(3, 1fr)",
+      padding: `0 ${theme.spacing.unit * 2}px`
     },
     message: {
-      color: theme.palette.primary.contrastText,
-      fontWeight: "bold",
-      marginBottom: theme.spacing.unit,
+      color: "white",
       padding: theme.spacing.unit,
       textAlign: "center"
     },
     paper: {
-      marginBottom: theme.spacing.unit,
       padding: theme.spacing.unit
     },
     root: {
-      backgroundColor: pink[300],
-      boxSizing: "border-box",
-      minHeight: "100vh",
-      padding: theme.spacing.unit * 2
+      alignItems: "center",
+      backgroundColor: pink[50],
+      display: "flex",
+      height: "100vh",
+      justifyContent: "center",
+      overflow: "hidden"
+    },
+    stmt: {
+      backgroundColor: pink[400],
+      display: "grid",
+      gridGap: `${theme.spacing.unit * 1.5}px`,
+      gridTemplateColumns: "repeat(10, 1fr)",
+      height: 80,
+      width: "100%"
     },
     title: {
-      color: theme.palette.primary.contrastText,
-      fontWeight: "bold",
-      marginBottom: theme.spacing.unit,
+      color: "white",
       padding: theme.spacing.unit,
       textAlign: "center"
+    },
+    wrap: {
+      backgroundColor: pink[200],
+      borderRadius: 20,
+      height: 520,
+      maxWidth: 480,
+      width: 300
     }
   });
 
@@ -203,7 +225,7 @@ const App = withStyles(styles)(
       });
     };
 
-    public hangleKeyboardChange = (label: string) => {
+    public handleClick = (label: string) => {
       const answer = this.state.inputAnswer;
 
       if (label === "=") {
@@ -265,45 +287,36 @@ const App = withStyles(styles)(
       return (
         <MuiThemeProvider theme={exTheme}>
           <div className={classes.root}>
-            <Typography className={classes.title}>
-              {`計算カード #${cardNumber}`}
-            </Typography>
-            <Paper className={classes.paper}>
-              <Grid
-                alignItems="center"
-                container={true}
-                direction="row"
-                justify="center"
-                spacing={8}
-              >
-                <Grid item={true}>
-                  {state === StateType.TURNING ? (
-                    <CircularProgress color="secondary" />
-                  ) : (
-                    false
-                  )}
-                  <Typography className={classes.expr}>
-                    {cardExpression}
-                  </Typography>
-                </Grid>
-                <Grid item={true}>
-                  <TextField
-                    InputProps={{
-                      classes: {
-                        input: classes.field
-                      },
-                      readOnly: true
-                    }}
-                    value={inputAnswer}
-                    variant="outlined"
-                  />
-                </Grid>
-              </Grid>
-            </Paper>
-            <Typography className={classes.message}>
-              {messages[state]}
-            </Typography>
-            <Keyboard onChange={this.hangleKeyboardChange} />
+            <div className={classes.wrap}>
+              <Typography className={classes.title}>
+                {`計算カード #${cardNumber}`}
+              </Typography>
+              <div className={classes.stmt}>
+                <Typography className={classes.expr}>
+                  {cardExpression}
+                </Typography>
+                <Typography className={classes.answer}>
+                  {inputAnswer}
+                </Typography>
+              </div>
+              <Typography className={classes.message}>
+                {messages[state]}
+              </Typography>
+              <div className={classes.keyboard}>
+                <Key label="7" onClick={this.handleClick} type="normal" />
+                <Key label="8" onClick={this.handleClick} type="normal" />
+                <Key label="9" onClick={this.handleClick} type="normal" />
+                <Key label="4" onClick={this.handleClick} type="normal" />
+                <Key label="5" onClick={this.handleClick} type="normal" />
+                <Key label="6" onClick={this.handleClick} type="normal" />
+                <Key label="1" onClick={this.handleClick} type="normal" />
+                <Key label="2" onClick={this.handleClick} type="normal" />
+                <Key label="3" onClick={this.handleClick} type="normal" />
+                <Key label="AC" onClick={this.handleClick} type="clear" />
+                <Key label="0" onClick={this.handleClick} type="normal" />
+                <Key label="=" onClick={this.handleClick} type="enter" />
+              </div>
+            </div>
           </div>
         </MuiThemeProvider>
       );
