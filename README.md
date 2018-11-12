@@ -4,6 +4,8 @@
 
 https://nagaki.github.io/keisancard/
 
+![screen](https://github.com/nagaki/keisancard/blob/master/public/screen.gif?raw=true)
+
 ## 機能
 
 1. 計算のもんだいを表示します
